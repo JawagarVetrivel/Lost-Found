@@ -1,6 +1,10 @@
 import { Claim, Item, Match, Notification, ReportStats, User } from '../types';
 
-const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL =
+  (import.meta as any).env?.VITE_API_URL ||
+  ((import.meta as any).env?.PROD
+    ? 'https://lost-found-gjlr.onrender.com/api'
+    : 'http://localhost:5000/api');
 
 /**
  * HTTP helper for standard REST requests
