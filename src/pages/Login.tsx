@@ -2,24 +2,27 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../services/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     try {
       const user = await authApi.login({ email, password });
       login(user);
       navigate('/dashboard');
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message || 'Failed to sign in. Please verify your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -44,6 +47,12 @@ export default function Login() {
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Email address</label>
@@ -105,6 +114,29 @@ export default function Login() {
           
           <div className="mt-4 text-center text-xs text-slate-500">
             For this prototype, any credentials will log you in.
+          </div>
+
+          <div className="pt-2 flex flex-col gap-1.5 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('student@campus.edu');
+                setPassword('Password123!');
+              }}
+              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium underline"
+            >
+              Fill Demo Student (student@campus.edu)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@campus.edu');
+                setPassword('Password123!');
+              }}
+              className="text-xs text-slate-500 hover:text-slate-700 underline"
+            >
+              Fill Demo Admin (admin@campus.edu)
+            </button>
           </div>
         </form>
       </div>

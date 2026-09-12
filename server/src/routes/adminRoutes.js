@@ -12,10 +12,11 @@ import { authenticate, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 
-// Strictly enforce authentication and admin role
-router.use(authenticate, requireRole('admin'));
+// Allow authenticated users to read campus stats for their dashboard
+router.get('/stats', authenticate, getStats);
 
-router.get('/stats', getStats);
+// Strictly enforce admin role for all user management, inventory moderation, and claims review
+router.use(authenticate, requireRole('admin'));
 router.get('/users', getUsers);
 router.get('/items', getAdminItems);
 router.get('/claims', getAdminClaims);

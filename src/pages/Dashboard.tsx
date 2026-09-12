@@ -22,15 +22,21 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsData, itemsData, matchesData] = await Promise.all([
+        const [statsRes, itemsRes, matchesRes] = await Promise.allSettled([
           adminApi.getStats(),
           itemsApi.getItems(),
           matchesApi.getMatches()
         ]);
         
-        setStats(statsData);
-        setRecentItems(itemsData.slice(0, 3));
-        setHighConfidenceMatches(matchesData.filter(m => m.finalScore > 85));
+        if (statsRes.status === 'fulfilled') {
+          setStats(statsRes.value);
+        }
+        if (itemsRes.status === 'fulfilled') {
+          setRecentItems(itemsRes.value.slice(0, 3));
+        }
+        if (matchesRes.status === 'fulfilled') {
+          setHighConfidenceMatches(matchesRes.value.filter(m => m.finalScore > 85));
+        }
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {
