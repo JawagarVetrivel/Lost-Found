@@ -192,18 +192,24 @@ export default function ItemDetails() {
                 </div>
               ) : (
                 <button 
-                  onClick={() => setIsClaimDialogOpen(true)}
+                  onClick={() => {
+                    if (!user) {
+                      navigate('/login');
+                      return;
+                    }
+                    setIsClaimDialogOpen(true);
+                  }}
                   className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 font-medium shadow-sm transition-colors"
                 >
                   {isLost ? (
                     <>
                       <AlertTriangle size={18} className="mr-2" />
-                      I found this item
+                      {user ? 'I found this item' : 'Sign in to report found'}
                     </>
                   ) : (
                     <>
                       <MessageSquare size={18} className="mr-2" />
-                      This is my item
+                      {user ? 'This is my item' : 'Sign in to claim this item'}
                     </>
                   )}
                 </button>

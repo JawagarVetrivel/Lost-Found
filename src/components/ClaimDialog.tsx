@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, Loader2, Info } from 'lucide-react';
+import { X, Upload, Loader2, Info, AlertCircle } from 'lucide-react';
 import { Item } from '../types';
 import { claimsApi, uploadApi } from '../services/api';
 
@@ -13,6 +13,7 @@ export default function ClaimDialog({ isOpen, onClose, item }: ClaimDialogProps)
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
 
   if (!isOpen) return null;
@@ -26,6 +27,7 @@ export default function ClaimDialog({ isOpen, onClose, item }: ClaimDialogProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     try {
       let proofImageUrl: string | undefined;
       if (proofFile) {
@@ -43,8 +45,9 @@ export default function ClaimDialog({ isOpen, onClose, item }: ClaimDialogProps)
         proofImageUrl,
       });
       setIsSuccess(true);
-    } catch (error) {
-      console.error('Failed to submit claim', error);
+    } catch (err: any) {
+      console.error('Failed to submit claim', err);
+      setError(err?.message || 'Failed to submit claim. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -52,7 +55,9 @@ export default function ClaimDialog({ isOpen, onClose, item }: ClaimDialogProps)
 
   const handleClose = () => {
     setIsSuccess(false);
+    setError(null);
     setMessage('');
+    setProofFile(null);
     onClose();
   };
 
@@ -88,6 +93,13 @@ export default function ClaimDialog({ isOpen, onClose, item }: ClaimDialogProps)
             </div>
             
             <form onSubmit={handleSubmit} className="p-6">
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-center gap-2">
+                  <AlertCircle size={16} className="shrink-0 text-red-500" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               <div className="mb-6 bg-blue-50 border border-blue-100 p-4 rounded-lg flex items-start">
                 <Info size={20} className="text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
                 <p className="text-sm text-blue-800">{description}</p>

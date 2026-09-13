@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { CATEGORIES, LOCATIONS } from '../lib/constants';
 import { itemsApi, uploadApi } from '../services/api';
 
@@ -11,6 +11,8 @@ interface ReportFormProps {
 export default function ReportForm({ type }: ReportFormProps) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
@@ -27,6 +29,7 @@ export default function ReportForm({ type }: ReportFormProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError(null);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,6 +43,30 @@ export default function ReportForm({ type }: ReportFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    // Client-side validations
+    if (!formData.title.trim()) {
+      setError("Please enter the item title or name.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (!formData.category) {
+      setError("Please select a category from the list.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (!formData.location) {
+      setError("Please select an approximate campus location.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (!formData.description.trim() || formData.description.trim().length < 5) {
+      setError("Please provide a detailed description (at least 5 characters).");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -63,9 +90,14 @@ export default function ReportForm({ type }: ReportFormProps) {
       } else {
         await itemsApi.createFoundItem(itemPayload);
       }
-      navigate('/dashboard');
-    } catch (error) {
-      console.error("Failed to create report", error);
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1200);
+    } catch (err: any) {
+      console.error("Failed to create report", err);
+      setError(err?.message || "Failed to create report. Please verify all details and try again.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
     }
@@ -81,6 +113,31 @@ export default function ReportForm({ type }: ReportFormProps) {
           Provide as much detail as possible to help our AI matching system.
         </p>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl flex items-center justify-between gap-3 animate-in fade-in duration-200">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle size={18} className="shrink-0 text-red-500" />
+            <span className="font-medium">{error}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="text-red-400 hover:text-red-600 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl flex items-center gap-2.5 animate-in fade-in duration-200">
+          <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+          <span className="font-medium">
+            Report submitted successfully! Redirecting to dashboard...
+          </span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-6 sm:p-8 space-y-8">
@@ -240,7 +297,10 @@ export default function ReportForm({ type }: ReportFormProps) {
                   <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                   <button
                     type="button"
-                    onClick={() => setImagePreview(null)}
+                    onClick={() => {
+                      setImagePreview(null);
+                      setImageFile(null);
+                    }}
                     className="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full text-slate-700 hover:text-red-600 hover:bg-white backdrop-blur-sm"
                   >
                     <X size={16} />

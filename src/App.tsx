@@ -37,18 +37,22 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-            <Route path="/dashboard" element={<Dashboard />} />
+          {/* Main App Layout */}
+          <Route element={<AppLayout />}>
+            {/* Publicly browse items & view details */}
             <Route path="/browse" element={<BrowseItems />} />
-            <Route path="/report/lost" element={<ReportForm type="lost" />} />
-            <Route path="/report/found" element={<ReportForm type="found" />} />
             <Route path="/item/:id" element={<ItemDetails />} />
-            <Route path="/matches" element={<SmartMatches />} />
-            <Route path="/my-reports" element={<MyReports />} />
-            <Route path="/notifications" element={<Notifications />} />
             
-            {/* Admin Route - mock user is not admin, so this will redirect to dashboard unless user object is modified */}
-            <Route path="/admin" element={<AdminDashboard />} />
+            {/* Protected authenticated routes */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/report/lost" element={<ProtectedRoute><ReportForm type="lost" /></ProtectedRoute>} />
+            <Route path="/report/found" element={<ProtectedRoute><ReportForm type="found" /></ProtectedRoute>} />
+            <Route path="/matches" element={<ProtectedRoute><SmartMatches /></ProtectedRoute>} />
+            <Route path="/my-reports" element={<ProtectedRoute><MyReports /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            
+            {/* Admin Route */}
+            <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
           </Route>
         </Routes>
       </Router>

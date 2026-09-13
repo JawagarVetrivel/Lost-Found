@@ -107,19 +107,28 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         <div className="p-4 border-t border-slate-200">
           <div className="flex items-center">
             <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-              {user?.name.charAt(0) || 'U'}
+              {user?.name?.charAt(0) || 'G'}
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-slate-900 truncate w-32">{user?.name}</p>
-              <p className="text-xs text-slate-500 truncate w-32">{user?.email}</p>
+              <p className="text-sm font-medium text-slate-900 truncate w-32">{user?.name || 'Guest'}</p>
+              <p className="text-xs text-slate-500 truncate w-32">{user?.email || 'Browsing campus'}</p>
             </div>
-            <button 
-              onClick={logout}
-              className="ml-auto text-slate-400 hover:text-red-500 p-1"
-              title="Logout"
-            >
-              <LogOut size={18} />
-            </button>
+            {user ? (
+              <button 
+                onClick={logout}
+                className="ml-auto text-slate-400 hover:text-red-500 p-1"
+                title="Logout"
+              >
+                <LogOut size={18} />
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="ml-auto text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-md transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       </div>
